@@ -1,47 +1,89 @@
 /**
- * Admin Seed Script
+ * Default seed script
  * Usage: node seeder.js
  *
- * Creates the initial admin user if one doesn't already exist.
- * Change the password after first login!
+ * Creates the initial admin, patient, and doctor users if they do not exist.
  */
 
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import User from './models/User.js';
+import Doctor from './models/Doctor.js';
 
 dotenv.config();
 
-const ADMIN_NAME     = 'Admin';
-const ADMIN_EMAIL    = 'admin@healthconnect.com';
-const ADMIN_PASSWORD = 'Admin@123456';
+const ACCOUNTS = [
+  {
+    name: 'Admin',
+    email: 'admin@healthconnect.com',
+    password: 'Admin@123456',
+    role: 'admin',
+  },
+  {
+    name: 'Patient User',
+    email: 'patient@healthconnect.com',
+    password: 'Patient@123',
+    role: 'patient',
+  },
+  {
+    name: 'Doctor User',
+    email: 'doctor@healthconnect.com',
+    password: 'Doctor@123',
+    role: 'doctor',
+  },
+];
+
+const DEFAULT_DOCTOR_PROFILE = {
+  specialization: 'General Medicine',
+  experience: 8,
+  consultationFee: 500,
+  availableDays: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+  availableTiming: { start: '09:00', end: '17:00' },
+  slotDuration: 30,
+  about: 'This is a seeded doctor profile for testing purposes.',
+  licenseNumber: 'LIC-000123',
+  hospitalAffiliation: 'HealthConnect Medical Center',
+  verificationStatus: 'approved',
+  verified: true,
+};
 
 const seed = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ Connected to MongoDB');
 
-    const existing = await User.findOne({ email: ADMIN_EMAIL });
+    for (const account of ACCOUNTS) {
+      const existing = await User.findOne({ email: account.email });
+      if (existing) {
+        console.log(`ℹ️  ${account.role} already exists: ${account.email}`);
+        continue;
+      }
 
-    if (existing) {
-      console.log(`ℹ️  Admin already exists: ${ADMIN_EMAIL}`);
-      console.log('   Run this script only once, or delete the existing admin first.');
-      process.exit(0);
+      await User.create(account);
+      console.log(`✅ Created ${account.role}: ${account.email}`);
     }
 
-    await User.create({
-      name:     ADMIN_NAME,
-      email:    ADMIN_EMAIL,
-      password: ADMIN_PASSWORD,
-      role:     'admin',
-    });
+    const doctorUser = await User.findOne({ email: 'doctor@healthconnect.com' });
+    if (doctorUser) {
+      const existingProfile = await Doctor.findOne({ userId: doctorUser._id });
+      if (!existingProfile) {
+        await Doctor.create({
+          userId: doctorUser._id,
+          ...DEFAULT_DOCTOR_PROFILE,
+        });
+        console.log('✅ Created default doctor profile for doctor@healthconnect.com');
+      } else {
+        console.log('ℹ️  Doctor profile already exists for doctor@healthconnect.com');
+      }
+    }
 
-    console.log('\n🎉 Admin user created successfully!');
+    console.log('\n🎉 Seed completed!');
     console.log('─────────────────────────────────');
-    console.log(`   Email    : ${ADMIN_EMAIL}`);
-    console.log(`   Password : ${ADMIN_PASSWORD}`);
+    console.log('   Admin:   admin@healthconnect.com / Admin@123456');
+    console.log('   Patient: patient@healthconnect.com / Patient@123');
+    console.log('   Doctor:  doctor@healthconnect.com / Doctor@123');
     console.log('─────────────────────────────────');
-    console.log('⚠️  Please change the password after your first login!\n');
+    console.log('⚠️  Change these credentials after initial testing.\n');
     process.exit(0);
   } catch (error) {
     console.error('❌ Seeder error:', error.message);
