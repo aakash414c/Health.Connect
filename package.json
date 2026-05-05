@@ -1,0 +1,34 @@
+{
+  "dependencies": {
+    "express": "^5.2.1",
+    "mongodb": "^7.2.0",
+    "mongoose": "^9.6.1",
+    "node": "^24.15.0",
+    "nodemon": "^3.1.14"
+  },
+  "name": "health-connect",
+  "version": "1.0.0",
+  "description": "HealthConnect is a full-stack healthcare appointment platform built using the MERN stack that allows patients to book appointments with verified doctors, manage prescriptions, make payments, and schedule appointments using smart slot availability.",
+  "main": "insert.js",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  },
+  "scripts": {
+    "start": "cd backend && npm start",
+    "client": "cd frontend && npm run dev",
+    "dev": "concurrently \"cd backend && npm start\" \"cd frontend && npm run dev\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AnishRana001/Health-Connect.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AnishRana001/Health-Connect/issues"
+  },
+  "homepage": "https://github.com/AnishRana001/Health-Connect#readme"
+}
